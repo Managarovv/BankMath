@@ -1,0 +1,1453 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Math — задания</title>
+  <link rel="stylesheet" type="text/css" href="css/style.css">
+
+  <!-- KaTeX: content приходит как сырой текст с $$...$$, рендерим на клиенте -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg: #f7f8fa;
+      --surface: #ffffff;
+      --text: #172033;
+      --muted: #7b8494;
+      --border: #e5e8ee;
+      --accent: #2563eb;
+      --accent-soft: #eef4ff;
+      --done: #4b9b68;
+      --done-soft: #eef8f1;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family:
+        Inter,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Arial,
+        sans-serif;
+    }
+
+    button {
+      font: inherit;
+    }
+
+    .app {
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 42px 24px;
+    }
+
+    .shell {
+      width: 100%;
+      max-width: 1100px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+
+    /* Header */
+
+    .header {
+      height: 58px;
+      border-bottom: 1px solid #edf0f4;
+
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      padding: 0 22px;
+    }
+
+    .logo {
+      color: var(--accent);
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 22px;
+
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .task-meta {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .progress {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .progress-line {
+      width: 90px;
+      height: 4px;
+      background: #edf0f4;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .progress-line-fill {
+      height: 100%;
+      width: 0%;
+      background: var(--accent);
+      border-radius: 4px;
+      transition: width .2s ease;
+    }
+
+    .menu {
+      border: 0;
+      background: none;
+      color: var(--muted);
+      font-size: 20px;
+      line-height: 1;
+      cursor: pointer;
+    }
+
+    /* Main layout */
+
+    .layout {
+      display: grid;
+      grid-template-columns: 210px 1fr;
+      min-height: 650px;
+    }
+
+    /* Sidebar */
+
+    .sidebar {
+      border-right: 1px solid #edf0f4;
+      padding: 28px 14px;
+    }
+
+    .sidebar-title {
+      padding: 0 10px 12px;
+
+      color: #9aa3b2;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+
+    .section-btn {
+      width: 100%;
+
+      border: 0;
+      background: none;
+      border-radius: 7px;
+
+      padding: 10px;
+
+      color: #4f5969;
+      font-size: 14px;
+      text-align: left;
+
+      cursor: pointer;
+    }
+
+    .section-btn:hover {
+      background: #f7f8fa;
+    }
+
+    .section-btn.active {
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    /* Content */
+
+    .content {
+      max-width: 780px;
+      padding: 42px 48px 48px;
+    }
+
+    .breadcrumb {
+      margin-bottom: 18px;
+
+      color: #9aa3b2;
+      font-size: 12px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+
+      font-size: 24px;
+      line-height: 1.3;
+      font-weight: 650;
+    }
+
+    .subtitle {
+      margin-bottom: 30px;
+
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    /* Topics */
+
+    .topic-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .topic {
+      padding: 16px 17px;
+
+      border: 1px solid var(--border);
+      border-radius: 9px;
+
+      cursor: pointer;
+
+      transition:
+        border-color .15s ease,
+        transform .15s ease;
+    }
+
+    .topic:hover {
+      border-color: #cbd2dd;
+      transform: translateY(-1px);
+    }
+
+    .topic-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .topic-name {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .topic-count {
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .bar {
+      height: 3px;
+      margin-top: 12px;
+
+      background: #edf0f4;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .fill {
+      height: 100%;
+      background: #8fb0f7;
+      border-radius: 4px;
+    }
+
+    .topic.current {
+      border-color: #b9cdf9;
+      background: #fbfdff;
+    }
+
+    /* Task list */
+
+    .task-view {
+      display: none;
+    }
+
+    .task-view.active {
+      display: block;
+    }
+
+    .task-list {
+      border-top: 1px solid #edf0f4;
+    }
+
+    .task-row {
+      display: grid;
+      grid-template-columns: 30px 48px 1fr 30px;
+      align-items: center;
+      gap: 10px;
+
+      padding: 15px 8px;
+
+      border-bottom: 1px solid #edf0f4;
+
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .task-row:hover {
+      background: #fafbfc;
+    }
+
+    .status {
+      width: 19px;
+      height: 19px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      border: 1.5px solid #cbd1dc;
+      border-radius: 50%;
+
+      font-size: 11px;
+    }
+
+    .status.done {
+      border-color: #b9d9c2;
+      background: var(--done-soft);
+      color: var(--done);
+    }
+
+    .status.current {
+      border-color: #8eacf0;
+      color: var(--accent);
+      font-size: 8px;
+    }
+
+    .num {
+      color: #9aa3b2;
+      font-size: 12px;
+    }
+
+    .task-name {
+      font-size: 14px;
+    }
+
+    .task-formula {
+      margin-top: 4px;
+
+      color: #8b94a3;
+      font-size: 12px;
+    }
+
+    .arrow {
+      color: #b0b7c2;
+      font-size: 18px;
+    }
+
+    .back {
+      margin-bottom: 25px;
+      padding: 0;
+
+      border: 0;
+      background: none;
+
+      color: var(--muted);
+      font-size: 13px;
+
+      cursor: pointer;
+    }
+
+    .back:hover {
+      color: var(--accent);
+    }
+
+    /* Task page */
+
+    .task-page {
+      display: none;
+    }
+
+    .task-page.active {
+      display: block;
+    }
+
+    .task-title {
+      margin: 0 0 20px;
+      font-size: 22px;
+      font-weight: 650;
+    }
+
+    .task-body {
+      margin-bottom: 20px;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .task-paragraph {
+      margin: 0 0 14px;
+    }
+
+    .math-block {
+      margin: 16px 0;
+      padding: 14px 16px;
+      background: #f7f8fa;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow-x: auto;
+    }
+
+    .task-image-wrapper {
+      display: none;
+      margin-bottom: 20px;
+    }
+
+    .task-image {
+      max-width: 100%;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+
+    .instruction {
+      margin-bottom: 22px;
+      padding: 12px 14px;
+      background: var(--accent-soft);
+      border-radius: 8px;
+      color: #2c4a86;
+      font-size: 13px;
+    }
+
+    .solution-wrapper {
+      margin-bottom: 20px;
+    }
+
+    .solution-label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--muted);
+    }
+
+    .solution {
+      width: 100%;
+      min-height: 160px;
+      padding: 12px 14px;
+
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      resize: vertical;
+
+      font: inherit;
+      font-size: 14px;
+      line-height: 1.5;
+      color: var(--text);
+    }
+
+    .solution:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .attachment {
+      margin-top: 14px;
+    }
+
+    .attachment-input {
+      display: none;
+    }
+
+    .attachment-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+
+      padding: 9px 14px;
+
+      border: 1px dashed #cbd2dd;
+      border-radius: 8px;
+
+      color: var(--muted);
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .attachment-label:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .paperclip {
+      font-size: 14px;
+    }
+
+    .uploaded-files {
+      margin-top: 10px;
+
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .uploaded-file {
+      padding: 7px 10px;
+
+      background: #f7f8fa;
+      border-radius: 6px;
+
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .task-actions {
+      margin-top: 18px;
+    }
+
+    .submit-button {
+      padding: 11px 20px;
+
+      border: 0;
+      border-radius: 8px;
+      background: var(--accent);
+
+      color: #fff;
+      font-size: 14px;
+      font-weight: 600;
+
+      cursor: pointer;
+    }
+
+    .submit-button:hover {
+      background: #1d4fc4;
+    }
+
+    .submitted-message {
+      display: none;
+      margin-top: 14px;
+
+      color: var(--done);
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .task-navigation {
+      display: flex;
+      justify-content: space-between;
+
+      margin-top: 34px;
+      padding-top: 22px;
+
+      border-top: 1px solid #edf0f4;
+    }
+
+    .nav-button {
+      padding: 9px 16px;
+
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: none;
+
+      color: var(--text);
+      font-size: 13px;
+
+      cursor: pointer;
+    }
+
+    .nav-button:hover:not(:disabled) {
+      border-color: #cbd2dd;
+    }
+
+    .nav-button:disabled {
+      opacity: .4;
+      cursor: not-allowed;
+    }
+
+    .task-placeholder {
+      padding: 60px 30px;
+
+      border: 1px dashed #d9dee8;
+      border-radius: 10px;
+
+      color: var(--muted);
+      text-align: center;
+      font-size: 14px;
+    }
+
+    /* Mobile */
+
+    @media (max-width: 760px) {
+      .app {
+        padding: 0;
+      }
+
+      .shell {
+        min-height: 100vh;
+        border: 0;
+        border-radius: 0;
+      }
+
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        display: flex;
+        overflow-x: auto;
+
+        border-right: 0;
+        border-bottom: 1px solid #edf0f4;
+
+        padding: 10px;
+      }
+
+      .sidebar-title {
+        display: none;
+      }
+
+      .section-btn {
+        width: auto;
+        white-space: nowrap;
+      }
+
+      .content {
+        padding: 30px 22px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="app">
+  <div class="shell">
+
+    <!-- Header -->
+
+    <header class="header">
+      <div class="logo">
+        Math
+      </div>
+
+      <div class="header-right">
+        <div class="task-meta">
+
+          <span
+            id="taskCategory"
+            class="task-category"
+          ></span>
+
+          <div class="progress">
+
+            <span id="taskProgress"></span>
+
+            <div class="progress-line">
+              <div
+                id="progressFill"
+                class="progress-line-fill"
+              ></div>
+            </div>
+
+          </div>
+
+        </div>
+
+        <button
+          class="menu"
+          type="button"
+          aria-label="Меню"
+        >
+          ⋯
+        </button>
+      </div>
+    </header>
+
+
+    <div class="layout">
+
+      <!-- Sidebar -->
+
+      <!--
+        Список предметов статический (сайдбар нужен ДО первого запроса к API,
+        а API отдаёт задания только по конкретному предмету).
+        Если появится отдельный эндпоинт со списком предметов —
+        замени этот блок на генерацию из его ответа, как в renderSidebar().
+      -->
+
+      <aside class="sidebar" id="sidebar">
+
+        <div class="sidebar-title">
+          Разделы
+        </div>
+
+        <button class="section-btn" type="button" data-section="Алгебра">Алгебра</button>
+        <button class="section-btn" type="button" data-section="Геометрия">Геометрия</button>
+        <button class="section-btn" type="button" data-section="Тригонометрия">Тригонометрия</button>
+        <button class="section-btn" type="button" data-section="Вероятность">Вероятность</button>
+
+      </aside>
+
+
+      <!-- Content -->
+
+      <main class="content">
+
+        <!-- ==============================
+             TOPICS
+        =============================== -->
+
+        <section id="topicView">
+
+          <div class="breadcrumb">
+            Математика /
+            <span id="sectionName"></span>
+          </div>
+
+          <h1 id="sectionTitle"></h1>
+
+          <div class="subtitle">
+            Выберите тему, чтобы открыть задания
+          </div>
+
+          <div
+            id="topics"
+            class="topic-list"
+          ></div>
+
+        </section>
+
+
+        <!-- ==============================
+             TASK LIST
+        =============================== -->
+
+        <section
+          id="taskListView"
+          class="task-view"
+        >
+
+          <button
+            id="backTopics"
+            class="back"
+            type="button"
+          >
+            ← Все темы
+          </button>
+
+          <div class="breadcrumb">
+            <span id="sectionBreadcrumb"></span> /
+            <span id="topicBreadcrumb"></span>
+          </div>
+
+          <h1 id="topicTitle"></h1>
+
+          <div
+            id="topicSubtitle"
+            class="subtitle"
+          ></div>
+
+          <div
+            id="tasks"
+            class="task-list"
+          ></div>
+
+        </section>
+
+
+        <!-- ==============================
+             TASK PAGE
+        =============================== -->
+
+        <section
+          id="taskPage"
+          class="task-page"
+        >
+
+          <button
+            id="backTasks"
+            class="back"
+            type="button"
+          >
+            ← К заданиям
+          </button>
+
+          <div class="task-content">
+
+            <h1 id="taskTitle" class="task-title"></h1>
+
+            <div id="taskBody" class="task-body"></div>
+
+            <!-- Task image -->
+
+            <div id="taskImage" class="task-image-wrapper"></div>
+
+            <!-- Instruction -->
+
+            <div id="taskInstruction" class="instruction"></div>
+
+            <!-- =================================================
+                 SOLUTION
+            ================================================== -->
+
+            <div id="solutionWrapper" class="solution-wrapper">
+
+              <label id="solutionLabel" class="solution-label" for="solution">Ваше решение</label>
+
+              <textarea id="solution" class="solution" placeholder="Напишите решение здесь..."></textarea>
+
+              <!-- Attachment -->
+
+              <div id="attachment" class="attachment">
+
+                <input id="photoInput" class="attachment-input" type="file" accept="image/*" multiple>
+
+                <label class="attachment-label" for="photoInput">
+                  <span class="paperclip">📎</span>
+                  Прикрепить фото решения
+                </label>
+
+                <div id="uploadedFiles" class="uploaded-files"></div>
+
+              </div>
+
+              <!-- Submit -->
+
+              <div class="task-actions">
+
+                <button id="submitButton" class="submit-button">
+                  Отправить решение
+                </button>
+
+              </div>
+
+              <div id="submittedMessage" class="submitted-message">
+                ✓ Решение отправлено
+              </div>
+
+            </div>
+
+            <!-- =================================================
+                 NAVIGATION
+            ================================================== -->
+
+            <div class="task-navigation">
+
+              <button id="prevButton" class="nav-button">
+                ← Предыдущее
+              </button>
+
+              <button id="nextButton" class="nav-button">
+                Следующее →
+              </button>
+
+            </div>
+
+          </div>
+
+        </section>
+
+      </main>
+
+    </div>
+
+  </div>
+</div>
+
+
+<script>
+
+/*
+==============================================================
+ЗАПРОСЫ К API
+
+Подставь сюда реальные адреса своего бэкенда.
+Формат ответов — тот, что ты прислал:
+
+  fetchSectionTasks(subject) -> [
+    { id, title, topic, short, status }, ...
+  ]
+
+  fetchTaskDetails(id) -> {
+    id, subject, topic, title, content,
+    instruction, image, answer_type, allow_photo
+  }
+==============================================================
+*/
+var data = []
+
+async function fetchSectionTasks(subject) {
+
+  const response = await fetch(
+    `/taskslist?subject=${encodeURIComponent(subject)}`
+  )
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+
+  data = await response.json();
+  
+  //console.info("Данные с сервера:", data);
+  return data
+}
+
+async function fetchTaskDetails(id) {
+
+  /*const response = await fetch(`/taskslist/${id}`);
+
+  if (!response.ok) {
+    throw new Error(`HTTP ${response.status}`);
+  }
+
+  return response.json();*/
+  return data.find(element => element.id == id) || null;
+}
+
+async function submitTaskSolution(id, payload) {
+
+  // payload — например { solution: "...", photos: [...] }
+  // Раскомментируй, когда будет готов эндпоинт:
+
+  // const response = await fetch(`/api/tasks/${id}/submit`, {
+  //   method: "POST",
+  //   headers: { "Content-Type": "application/json" },
+  //   body: JSON.stringify(payload)
+  // });
+  //
+  // if (!response.ok) {
+  //   throw new Error(`HTTP ${response.status}`);
+  // }
+  //
+  // return response.json();
+
+  return Promise.resolve();
+
+}
+
+
+/*
+==============================================================
+STATE
+==============================================================
+*/
+
+let currentSection = null;   // "Алгебра", "Геометрия" ...
+let sectionTasks = [];       // краткие объекты текущего предмета
+let currentTopic = null;     // код темы, напр. "quadratic"
+let currentTopicItems = [];  // краткие объекты текущей темы
+let currentTaskIndex = 0;
+let currentTaskFull = null;  // полный объект открытого задания
+
+
+/*
+==============================================================
+DOM
+==============================================================
+*/
+
+const topicView =
+  document.getElementById("topicView");
+
+const taskListView =
+  document.getElementById("taskListView");
+
+const taskPage =
+  document.getElementById("taskPage");
+
+const topicsContainer =
+  document.getElementById("topics");
+
+const tasksContainer =
+  document.getElementById("tasks");
+
+
+/*
+==============================================================
+SHOW VIEW
+==============================================================
+*/
+
+function showView(view) {
+
+  topicView.style.display =
+    view === "topics" ? "block" : "none";
+
+  taskListView.classList.toggle("active", view === "tasks");
+  taskPage.classList.toggle("active", view === "task");
+
+}
+
+
+/*
+==============================================================
+ВЫБОР ПРЕДМЕТА → загрузка краткого списка заданий
+==============================================================
+*/
+
+document
+  .querySelectorAll(".section-btn")
+  .forEach(button => {
+
+    button.addEventListener("click", () => selectSection(button));
+
+  });
+
+async function selectSection(button) {
+
+  currentSection = button.dataset.section;
+  currentTopic = null;
+
+  document
+    .querySelectorAll(".section-btn")
+    .forEach(item => item.classList.remove("active"));
+
+  button.classList.add("active");
+
+  document.getElementById("sectionName").textContent = currentSection;
+  document.getElementById("sectionTitle").textContent = currentSection;
+
+  topicsContainer.innerHTML =
+    `<div class="task-placeholder">Загрузка тем…</div>`;
+
+  showView("topics");
+
+  try {
+
+    sectionTasks = await fetchSectionTasks(currentSection);
+    renderTopics();
+
+  } catch (error) {
+
+    console.error("Не удалось загрузить задания предмета:", error);
+
+    topicsContainer.innerHTML =
+      `<div class="task-placeholder">Не удалось загрузить темы. Попробуйте ещё раз.</div>`;
+
+  }
+
+}
+
+
+/*
+==============================================================
+RENDER TOPICS
+
+Группируем краткие задания по task.topic (код темы).
+Названия темы у нас нет в коротком объекте — показываем код.
+Если бэкенд начнёт присылать topic_name — замени topicCode
+на него здесь и в renderTasks().
+==============================================================
+*/
+
+function groupByTopic(list) {
+
+  const map = new Map();
+
+  list.forEach(task => {
+
+    if (!map.has(task.topic)) {
+      map.set(task.topic, []);
+    }
+
+    map.get(task.topic).push(task);
+
+  });
+
+  return map;
+
+}
+
+function renderTopics() {
+
+  const grouped = groupByTopic(sectionTasks);
+
+  if (grouped.size === 0) {
+    topicsContainer.innerHTML =
+      `<div class="task-placeholder">Заданий пока нет.</div>`;
+    return;
+  }
+
+  topicsContainer.innerHTML =
+    Array.from(grouped.entries()).map(([topicCode, items]) => {
+
+      const count = items.length;
+      const done = items.filter(t => t.status === "done").length;
+      const percentage = count ? Math.round(done / count * 100) : 0;
+
+      return `
+
+        <div
+          class="topic"
+          data-topic-id="${topicCode}"
+        >
+
+          <div class="topic-top">
+
+            <span class="topic-name">
+              ${topicCode}
+            </span>
+
+            <span class="topic-count">
+              ${done} / ${count} выполнено
+            </span>
+
+          </div>
+
+          <div class="bar">
+
+            <div
+              class="fill"
+              style="width: ${percentage}%"
+            ></div>
+
+          </div>
+
+        </div>
+
+      `;
+
+    }).join("");
+
+
+  document
+    .querySelectorAll(".topic")
+    .forEach(topicElement => {
+
+      topicElement.addEventListener("click", () => {
+
+        currentTopic = topicElement.dataset.topicId;
+        renderTasks();
+        showView("tasks");
+
+      });
+
+    });
+
+}
+
+
+/*
+==============================================================
+RENDER TASKS (внутри уже загруженного sectionTasks — без запроса)
+==============================================================
+*/
+
+function renderTasks() {
+
+  currentTopicItems =
+    sectionTasks.filter(task => task.topic === currentTopic);
+
+  const done =
+    currentTopicItems.filter(t => t.status === "done").length;
+
+  document.getElementById("sectionBreadcrumb").textContent = currentSection;
+  document.getElementById("topicBreadcrumb").textContent = currentTopic;
+  document.getElementById("topicTitle").textContent = currentTopic;
+
+  document.getElementById("topicSubtitle").textContent =
+    `${currentTopicItems.length} заданий · ${done} выполнено`;
+
+  tasksContainer.innerHTML =
+    currentTopicItems.map((task, index) => {
+
+      const isDone = task.status === "done";
+      const isCurrent = task.status === "current";
+
+      return `
+
+        <div
+          class="task-row"
+          data-task-id="${task.id}"
+        >
+
+          <span
+            class="status ${isDone ? "done" : ""} ${isCurrent ? "current" : ""}"
+          >
+            ${isDone ? "✓" : isCurrent ? "•" : ""}
+          </span>
+
+          <span class="num">
+            ${String(index + 1).padStart(2, "0")}
+          </span>
+
+          <div>
+
+            <div class="task-name">
+              ${task.title}
+            </div>
+
+            <div class="task-formula">
+              ${task.short}
+            </div>
+
+          </div>
+
+          <span class="arrow">
+            ›
+          </span>
+
+        </div>
+
+      `;
+
+    }).join("");
+
+}
+
+
+/*
+==============================================================
+РЕНДЕР КОНТЕНТА ЗАДАНИЯ (KaTeX)
+==============================================================
+*/
+
+function escapeHtml(str) {
+  const div = document.createElement("div");
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function renderTaskContent(container, text) {
+
+  const paragraphs = text.split(/\n\n+/);
+
+  container.innerHTML = paragraphs.map(paragraph => {
+
+    const trimmed = paragraph.trim();
+    const isMathBlock = /^\$\$[\s\S]*\$\$$/.test(trimmed);
+
+    return isMathBlock
+      ? `<div class="math-block">${escapeHtml(trimmed)}</div>`
+      : `<p class="task-paragraph">${escapeHtml(trimmed)}</p>`;
+
+  }).join("");
+
+  if (window.renderMathInElement) {
+    renderMathInElement(container, {
+      delimiters: [
+        { left: "$$", right: "$$", display: true },
+        { left: "$", right: "$", display: false }
+      ],
+      throwOnError: false
+    });
+  }
+
+}
+
+
+/*
+==============================================================
+ОТКРЫТИЕ ЗАДАНИЯ → загрузка полного объекта
+==============================================================
+*/
+
+tasksContainer.addEventListener("click", event => {
+
+  const row = event.target.closest(".task-row");
+
+  if (!row) {
+    return;
+  }
+
+  openTask(row.dataset.taskId);
+
+});
+
+async function openTask(taskId) {
+
+  const index =
+    currentTopicItems.findIndex(t => String(t.id) === String(taskId));
+
+  if (index === -1) {
+    return;
+  }
+
+  currentTaskIndex = index;
+
+  showView("task");
+  await loadAndRenderTask(currentTopicItems[index].id);
+
+}
+
+async function loadAndRenderTask(id) {
+
+  document.getElementById("taskTitle").textContent = "";
+  document.getElementById("taskBody").innerHTML =
+    `<p class="task-paragraph">Загрузка задания…</p>`;
+
+  try {
+
+    currentTaskFull = await fetchTaskDetails(id); // заменить запрос на поиск в массиве
+    renderTaskPage();
+
+  } catch (error) {
+
+    console.error("Не удалось загрузить задание:", error);
+
+    document.getElementById("taskBody").innerHTML =
+      `<p class="task-paragraph">Не удалось загрузить задание. Попробуйте ещё раз.</p>`;
+
+  }
+
+}
+
+function renderTaskPage() {
+
+  const task = currentTaskFull;
+  const shortItem = currentTopicItems[currentTaskIndex];
+
+  document.getElementById("taskTitle").textContent = task.title;
+
+  renderTaskContent(
+    document.getElementById("taskBody"),
+    task.content
+  );
+
+  // instruction
+  const instructionEl = document.getElementById("taskInstruction");
+  if (task.instruction) {
+    instructionEl.textContent = task.instruction;
+    instructionEl.style.display = "block";
+  } else {
+    instructionEl.style.display = "none";
+  }
+
+  // image (опциональное фото задания от API)
+  const imageEl = document.getElementById("taskImage");
+  if (task.image) {
+    imageEl.innerHTML = `<img class="task-image" src="${task.image}" alt="">`;
+    imageEl.style.display = "block";
+  } else {
+    imageEl.innerHTML = "";
+    imageEl.style.display = "none";
+  }
+
+  // solution field (по answer_type)
+  const solutionWrapper = document.getElementById("solutionWrapper");
+  const solutionField = document.getElementById("solution");
+
+  solutionField.value = "";
+
+  solutionWrapper.style.display =
+    task.answer_type === "solution" ? "block" : "none";
+
+  // attachment (по allow_photo)
+  const attachment = document.getElementById("attachment");
+  attachment.style.display = task.allow_photo ? "block" : "none";
+
+  document.getElementById("uploadedFiles").innerHTML = "";
+  document.getElementById("photoInput").value = "";
+
+  document.getElementById("submittedMessage").style.display =
+    shortItem && shortItem.status === "done" ? "block" : "none";
+
+  // header meta
+  document.getElementById("taskCategory").textContent =
+    `${task.subject} · ${task.topic}`;
+
+  document.getElementById("taskProgress").textContent =
+    `${currentTaskIndex + 1} / ${currentTopicItems.length}`;
+
+  document.getElementById("progressFill").style.width =
+    `${Math.round((currentTaskIndex + 1) / currentTopicItems.length * 100)}%`;
+
+  // nav buttons
+  document.getElementById("prevButton").disabled = currentTaskIndex === 0;
+  document.getElementById("nextButton").disabled =
+    currentTaskIndex === currentTopicItems.length - 1;
+
+}
+
+
+/*
+==============================================================
+BACK / NAVIGATION
+==============================================================
+*/
+
+document.getElementById("backTopics").addEventListener("click", () => {
+  renderTopics();
+  showView("topics");
+});
+
+document.getElementById("backTasks").addEventListener("click", () => {
+  renderTasks();
+  showView("tasks");
+});
+
+document.getElementById("prevButton").addEventListener("click", async () => {
+
+  if (currentTaskIndex > 0) {
+    currentTaskIndex--;
+    await loadAndRenderTask(currentTopicItems[currentTaskIndex].id);
+  }
+
+});
+
+document.getElementById("nextButton").addEventListener("click", async () => {
+
+  if (currentTaskIndex < currentTopicItems.length - 1) {
+    currentTaskIndex++;
+    await loadAndRenderTask(currentTopicItems[currentTaskIndex].id);
+  }
+
+});
+
+
+/*
+==============================================================
+SUBMIT / ATTACHMENT
+==============================================================
+*/
+
+document.getElementById("submitButton").addEventListener("click", async () => {
+
+  const task = currentTaskFull;
+  const shortItem = currentTopicItems[currentTaskIndex];
+
+  const solution = document.getElementById("solution").value;
+  const files = document.getElementById("photoInput").files;
+
+  try {
+
+    await submitTaskSolution(task.id, {
+      solution,
+      photos: Array.from(files).map(f => f.name)
+    });
+
+    // оптимистично помечаем как выполненное — источник истины всё равно бэкенд
+    if (shortItem) {
+      shortItem.status = "done";
+    }
+
+    document.getElementById("submittedMessage").style.display = "block";
+
+  } catch (error) {
+
+    console.error("Не удалось отправить решение:", error);
+
+  }
+
+});
+
+document.getElementById("photoInput").addEventListener("change", event => {
+
+  const container = document.getElementById("uploadedFiles");
+  container.innerHTML = "";
+
+  Array.from(event.target.files).forEach(file => {
+    const item = document.createElement("div");
+    item.className = "uploaded-file";
+    item.textContent = file.name;
+    container.appendChild(item);
+  });
+
+});
+
+</script>
+
+</body>
+</html>

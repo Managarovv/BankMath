@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Отправка массива объектов</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #f5f7fa;
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 700px;
+            background: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        h1 {
+            margin-top: 0;
+            font-size: 20px;
+            color: #222;
+        }
+
+        h2 {
+            margin: 0 0 14px;
+            font-size: 17px;
+            color: #222;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-size: 14px;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 260px;
+            padding: 14px;
+            font-family: "Fira Code", Consolas, Monaco, monospace;
+            font-size: 14px;
+            border: 1px solid #d0d7de;
+            border-radius: 8px;
+            resize: vertical;
+            outline: none;
+            transition: border-color 0.15s, box-shadow 0.15s;
+            background: #fafbfc;
+        }
+
+        textarea:focus {
+            border-color: #4a90e2;
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.15);
+            background: #fff;
+        }
+
+        textarea.invalid {
+            border-color: #e74c3c;
+            box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.15);
+        }
+
+        input[type="text"] {
+            flex: 1 1 auto;
+            min-width: 0;
+            padding: 10px 14px;
+            font-family: "Fira Code", Consolas, Monaco, monospace;
+            font-size: 14px;
+            color: #222;
+            border: 1px solid #d0d7de;
+            border-radius: 8px;
+            outline: none;
+            transition: border-color 0.15s, box-shadow 0.15s;
+            background: #fafbfc;
+        }
+
+        input[type="text"]:focus {
+            border-color: #4a90e2;
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.15);
+            background: #fff;
+        }
+
+        input[type="text"].invalid {
+            border-color: #e74c3c;
+            box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.15);
+        }
+
+        .actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        button {
+            padding: 10px 22px;
+            font-size: 15px;
+            font-weight: 500;
+            color: #fff;
+            background: #4a90e2;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.15s, transform 0.05s;
+        }
+
+        button:hover:not(:disabled) {
+            background: #3a7bc8;
+        }
+
+        button:active:not(:disabled) {
+            transform: translateY(1px);
+        }
+
+        button:disabled {
+            background: #a7c4e8;
+            cursor: not-allowed;
+        }
+
+        .status {
+            font-size: 14px;
+            padding: 10px 14px;
+            border-radius: 8px;
+            margin-top: 16px;
+            display: none;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .status.show {
+            display: block;
+        }
+
+        .status.ok {
+            background: #e6f4ea;
+            color: #1e7e34;
+            border: 1px solid #b7e1c1;
+        }
+
+        .status.err {
+            background: #fdecea;
+            color: #b71c1c;
+            border: 1px solid #f5b7b1;
+        }
+
+        .hint {
+            font-size: 12px;
+            color: #888;
+            margin-top: 6px;
+        }
+
+        /* ---------- блок поиска и результатов ---------- */
+
+        .divider {
+            border: none;
+            border-top: 1px solid #eaecef;
+            margin: 30px 0 24px;
+        }
+
+        .search-row {
+            display: flex;
+            align-items: stretch;
+            gap: 12px;
+        }
+
+        .search-row button {
+            flex: 0 0 auto;
+        }
+
+        .results-block {
+            margin-top: 26px;
+        }
+
+        ul.objects {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .object-item {
+            border: 1px solid #e1e4e8;
+            border-radius: 8px;
+            padding: 12px 14px;
+            margin-bottom: 10px;
+            background: #fafbfc;
+        }
+
+        .object-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .object-short {
+            flex: 1 1 auto;
+            min-width: 0;
+            font-size: 15px;
+            color: #222;
+            word-break: break-word;
+        }
+
+        .btn-small {
+            flex: 0 0 auto;
+            padding: 6px 12px;
+            font-size: 13px;
+            border-radius: 6px;
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+        }
+
+        .btn-danger:hover:not(:disabled) {
+            background: #c0392b;
+        }
+
+        .btn-secondary {
+            background: #6b7280;
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: #4b5563;
+        }
+
+        .edit-area {
+            margin-top: 12px;
+        }
+
+        .edit-area textarea {
+            min-height: 180px;
+        }
+
+        .empty {
+            margin: 0;
+            padding: 8px 0;
+            font-size: 14px;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Отправка массива объектов</h1>
+
+        <label for="jsonInput">JSON-массив объектов:</label>
+        <textarea id="jsonInput" spellcheck="false">[
+  { "id": 1, "name": "Иван", "age": 30 },
+  { "id": 2, "name": "Мария", "age": 25 }
+]</textarea>
+        <div class="hint">Введите корректный JSON — массив объектов.</div>
+
+        <div class="actions">
+            <button id="sendBtn">Отправить на сервер</button>
+        </div>
+
+        <div id="status" class="status"></div>
+
+        <hr class="divider">
+
+        <!-- ======================= ПОИСК ПО ID ======================= -->
+        <h2>Поиск объектов по id</h2>
+
+        <label for="idsInput">id объектов (через запятую):</label>
+        <div class="search-row">
+            <input type="text" id="idsInput" placeholder="id1, id2, id3...." spellcheck="false">
+            <button id="searchBtn" type="button">Найти</button>
+        </div>
+        <div class="hint">Например: 1, 2, 3</div>
+
+        <div id="searchStatus" class="status"></div>
+
+        <!-- ======================= РЕЗУЛЬТАТЫ ======================= -->
+        <div class="results-block">
+            <h2 id="resultsTitle" hidden>Результаты поиска</h2>
+            <div id="results"></div>
+        </div>
+    </div>
+
+    <script>
+        /* =====================================================================
+         *  ОБЩИЕ НАСТРОЙКИ API
+         * ===================================================================== */
+        const API_BASE   = "http://localhost:8081/admin";  // база
+        const SEARCH_URL = API_BASE + "/search";           // GET  — поиск по массиву id
+        // удаление:  DELETE  API_BASE + "/{id}"
+        // изменение: PATCH   API_BASE + "/{id}"
+
+        function itemUrl(id) {
+            //console.info(id)
+            return API_BASE + "/" + encodeURIComponent(id);
+        }
+
+        /* =====================================================================
+         *  1. ОТПРАВКА МАССИВА ОБЪЕКТОВ (существующий блок)
+         * ===================================================================== */
+        const textarea = document.getElementById("jsonInput");
+        const sendBtn  = document.getElementById("sendBtn");
+        const statusEl = document.getElementById("status");
+
+        function showStatus(message, type) {
+            statusEl.textContent = message;
+            statusEl.className = "status show " + type;
+        }
+
+        function hideStatus() {
+            statusEl.className = "status";
+        }
+
+        sendBtn.addEventListener("click", async () => {
+            hideStatus();
+            textarea.classList.remove("invalid");
+
+            // 1. Проверяем, что введён корректный JSON
+            let data;
+            try {
+                data = JSON.parse(textarea.value);
+            } catch (e) {
+                textarea.classList.add("invalid");
+                showStatus("Ошибка парсинга JSON: " + e.message, "err");
+                return;
+            }
+
+            // 2. Проверяем, что это массив
+            if (!Array.isArray(data)) {
+                textarea.classList.add("invalid");
+                showStatus("Ожидается массив объектов на верхнем уровне.", "err");
+                return;
+            }
+
+            // 3. Отправляем POST-запрос
+            sendBtn.disabled = true;
+            sendBtn.textContent = "Отправка...";
+
+            try {
+                const response = await fetch(API_BASE, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                let responseText = "";
+                try {
+                    responseText = await response.text();
+                } catch (_) { /* тело может быть пустым */ }
+
+                if (response.ok) {
+                    showStatus(
+                        `Успешно отправлено. Статус: ${response.status} ${response.statusText}` +
+                        (responseText ? `\n\nОтвет сервера:\n${responseText}` : ""),
+                        "ok"
+                    );
+                } else {
+                    showStatus(
+                        `Сервер вернул ошибку: ${response.status} ${response.statusText}` +
+                        (responseText ? `\n\n${responseText}` : ""),
+                        "err"
+                    );
+                }
+            } catch (err) {
+                showStatus(
+                    "Не удалось выполнить запрос: " + err.message +
+                    "\n\nПроверьте, что сервер запущен на http://localhost:8081 " +
+                    "и разрешает CORS-запросы с этой страницы.",
+                    "err"
+                );
+            } finally {
+                sendBtn.disabled = false;
+                sendBtn.textContent = "Отправить на сервер";
+            }
+        });
+
+        /* =====================================================================
+         *  2. ПОИСК ПО ID + СПИСОК РЕЗУЛЬТАТОВ
+         * ===================================================================== */
+        const idsInput     = document.getElementById("idsInput");
+        const searchBtn    = document.getElementById("searchBtn");
+        const searchStatus = document.getElementById("searchStatus");
+        const resultsTitle = document.getElementById("resultsTitle");
+        const resultsEl    = document.getElementById("results");
+
+        function showSearchStatus(message, type) {
+            searchStatus.textContent = message;
+            searchStatus.className = "status show " + type;
+        }
+
+        function hideSearchStatus() {
+            searchStatus.className = "status";
+        }
+
+        /* "1, 2, id3"  ->  [1, 2, "id3"] */
+        function parseIds(raw) {
+            if (raw === '0')
+                return "/all"
+            const clean = raw.replace(/[^0-9,]/g, "");
+            //console.info(clean)
+            return "?ids=" + clean;
+                // .split(/[,\s;]+/)
+                // .map(s => s.trim())
+                // .filter(Boolean)
+                // .map(s => /^-?\d+$/.test(s) ? Number(s) : s);
+        }
+
+        /* Сервер может вернуть как чистый массив, так и обёртку */
+        function extractItems(json) {
+            if (Array.isArray(json)) return json;
+            if (json && typeof json === "object") {
+                if (Array.isArray(json.items))  return json.items;
+                if (Array.isArray(json.data))   return json.data;
+                if (Array.isArray(json.result)) return json.result;
+            }
+            return [];
+        }
+
+        /* ---------------- рендер списка ---------------- */
+
+        function renderResults(items) {
+            resultsEl.innerHTML = "";
+            resultsTitle.hidden = false;
+
+            if (!items || !items.length) {
+                const p = document.createElement("p");
+                p.className = "empty";
+                p.textContent = "Ничего не найдено.";
+                resultsEl.appendChild(p);
+                return;
+            }
+
+            const ul = document.createElement("ul");
+            ul.className = "objects";
+            items.forEach(obj => ul.appendChild(createItemEl(obj)));
+            resultsEl.appendChild(ul);
+        }
+
+        function createItemEl(obj) {
+            const li = document.createElement("li");
+            li.className = "object-item";
+
+            let currentObj = obj;
+            const id = (obj && obj.id != null) ? obj.id : null;
+
+            /* ---------- режим просмотра ---------- */
+            const view = document.createElement("div");
+            view.className = "object-row";
+
+            const shortEl = document.createElement("span");
+            shortEl.className = "object-short";
+
+            const editBtn = document.createElement("button");
+            editBtn.type = "button";
+            editBtn.className = "btn-small";
+            editBtn.textContent = "Редактировать";
+
+            const delBtn = document.createElement("button");
+            delBtn.type = "button";
+            delBtn.className = "btn-small btn-danger";
+            delBtn.textContent = "Удалить";
+
+            view.append(shortEl, editBtn, delBtn);
+            li.appendChild(view);
+
+            /* ---------- сообщение для конкретного элемента ---------- */
+            const itemStatus = document.createElement("div");
+            itemStatus.className = "status";
+            li.appendChild(itemStatus);
+
+            function setItemStatus(message, type) {
+                if (!message) {
+                    itemStatus.textContent = "";
+                    itemStatus.className = "status";
+                    return;
+                }
+                itemStatus.textContent = message;
+                itemStatus.className = "status show " + type;
+            }
+
+            /* ---------- режим редактирования ---------- */
+            const editArea = document.createElement("div");
+            editArea.className = "edit-area";
+            editArea.hidden = true;
+
+            const editor = document.createElement("textarea");
+            editor.spellcheck = false;
+
+            const editActions = document.createElement("div");
+            editActions.className = "actions";
+
+            const saveBtn = document.createElement("button");
+            saveBtn.type = "button";
+            saveBtn.textContent = "Сохранить";
+
+            const cancelBtn = document.createElement("button");
+            cancelBtn.type = "button";
+            cancelBtn.className = "btn-secondary";
+            cancelBtn.textContent = "Отмена";
+
+            editActions.append(saveBtn, cancelBtn);
+            editArea.append(editor, editActions);
+            li.appendChild(editArea);
+
+            /* ---------- отрисовка поля short ---------- */
+            function refreshShort() {
+                shortEl.textContent = (currentObj && currentObj.short != null)
+                    ? String(currentObj.short)
+                    : "(поле short отсутствует)";
+            }
+            refreshShort();
+
+            /* Если у объекта нет id — работать с ним через API нельзя */
+            if (id === null) {
+                editBtn.disabled = true;
+                delBtn.disabled = true;
+                editBtn.title = delBtn.title = "У объекта нет поля id";
+            }
+
+            /* ---------- ОТКРЫТЬ РЕДАКТИРОВАНИЕ ---------- */
+            editBtn.addEventListener("click", () => {
+                setItemStatus("");
+                editor.classList.remove("invalid");
+                editor.value = JSON.stringify(currentObj, null, 2);
+                view.hidden = true;
+                editArea.hidden = false;
+                editor.focus();
+            });
+
+            /* ---------- ОТМЕНА ---------- */
+            cancelBtn.addEventListener("click", () => {
+                setItemStatus("");
+                editor.classList.remove("invalid");
+                editArea.hidden = true;
+                view.hidden = false;
+            });
+
+            /* ---------- СОХРАНИТЬ (PATCH) ---------- */
+            saveBtn.addEventListener("click", async () => {
+                setItemStatus("");
+                editor.classList.remove("invalid");
+
+                let updated;
+                try {
+                    updated = JSON.parse(editor.value);
+                } catch (e) {
+                    editor.classList.add("invalid");
+                    setItemStatus("Ошибка парсинга JSON: " + e.message, "err");
+                    return;
+                }
+
+                if (updated === null || typeof updated !== "object" || Array.isArray(updated)) {
+                    editor.classList.add("invalid");
+                    setItemStatus("Ожидается JSON-объект.", "err");
+                    return;
+                }
+
+                saveBtn.disabled = true;
+                saveBtn.textContent = "Сохранение...";
+
+                try {
+                    const response = await fetch(itemUrl(id), {
+                        method: "PATCH",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(updated)
+                    });
+
+                    let responseText = "";
+                    try { responseText = await response.text(); } catch (_) {}
+
+                    if (!response.ok) {
+                        setItemStatus(
+                            `Сервер вернул ошибку: ${response.status} ${response.statusText}` +
+                            (responseText ? `\n\n${responseText}` : ""),
+                            "err"
+                        );
+                        return;
+                    }
+
+                    // Если сервер вернул объект — используем его, иначе берём отредактированный
+                    let saved = updated;
+                    if (responseText) {
+                        try {
+                            const parsed = JSON.parse(responseText);
+                            if (parsed && typeof parsed === "object" &&
+                                !Array.isArray(parsed) && Object.keys(parsed).length) {
+                                saved = parsed;
+                            }
+                        } catch (_) { /* ответ не JSON — игнорируем */ }
+                    }
+
+                    currentObj = saved;
+                    refreshShort();
+                    editor.value = JSON.stringify(saved, null, 2);
+
+                    editArea.hidden = true;
+                    view.hidden = false;
+
+                    setItemStatus("Сохранено.", "ok");
+                    setTimeout(() => setItemStatus(""), 2500);
+                } catch (err) {
+                    setItemStatus("Не удалось выполнить запрос: " + err.message, "err");
+                } finally {
+                    saveBtn.disabled = false;
+                    saveBtn.textContent = "Сохранить";
+                }
+            });
+
+            /* ---------- УДАЛИТЬ (DELETE) ---------- */
+            delBtn.addEventListener("click", async () => {
+                setItemStatus("");
+                delBtn.disabled = true;
+                delBtn.textContent = "Удаление...";
+
+                try {
+                    const response = await fetch(itemUrl(id), { method: "DELETE" });
+
+                    if (!response.ok) {
+                        let responseText = "";
+                        try { responseText = await response.text(); } catch (_) {}
+                        setItemStatus(
+                            `Сервер вернул ошибку: ${response.status} ${response.statusText}` +
+                            (responseText ? `\n\n${responseText}` : ""),
+                            "err"
+                        );
+                        return;
+                    }
+
+                    li.remove();
+
+                    if (!resultsEl.querySelector(".object-item")) {
+                        resultsEl.innerHTML = '<p class="empty">Ничего не найдено.</p>';
+                    }
+                } catch (err) {
+                    setItemStatus("Не удалось выполнить запрос: " + err.message, "err");
+                } finally {
+                    delBtn.disabled = false;
+                    delBtn.textContent = "Удалить";
+                }
+            });
+
+            return li;
+        }
+
+        /* ---------------- обработчик кнопки "Найти" ---------------- */
+
+        searchBtn.addEventListener("click", async () => {
+            hideSearchStatus();
+            idsInput.classList.remove("invalid");
+
+            const ids = parseIds(idsInput.value);
+            if (!ids.length) {
+                idsInput.classList.add("invalid");
+                showSearchStatus("Введите хотя бы один id.", "err");
+                return;
+            }
+
+            searchBtn.disabled = true;
+            searchBtn.textContent = "Поиск...";
+
+            try {
+                newURL = SEARCH_URL+ids
+                console.info(newURL)
+                const response = await fetch(newURL, {
+                    method: "GET",
+                    headers: { "Content-Type": "application/json" },
+                });
+
+                let responseText = "";
+                try { responseText = await response.text(); } catch (_) {}
+
+                if (!response.ok) {
+                    showSearchStatus(
+                        `Сервер вернул ошибку: ${response.status} ${response.statusText}` +
+                        (responseText ? `\n\n${responseText}` : ""),
+                        "err"
+                    );
+                    return;
+                }
+
+                let json = [];
+                if (responseText) {
+                    try {
+                        json = JSON.parse(responseText);
+                    } catch (e) {
+                        showSearchStatus("Не удалось разобрать ответ сервера как JSON: " + e.message, "err");
+                        return;
+                    }
+                }
+
+                const items = extractItems(json);
+                renderResults(items);
+                showSearchStatus(`Найдено объектов: ${items.length}`, "ok");
+            } catch (err) {
+                showSearchStatus(
+                    "Не удалось выполнить запрос: " + err.message +
+                    "\n\nПроверьте, что сервер запущен на http://localhost:8081 " +
+                    "и разрешает CORS-запросы с этой страницы.",
+                    "err"
+                );
+            } finally {
+                searchBtn.disabled = false;
+                searchBtn.textContent = "Найти";
+            }
+        });
+    </script>
+</body>
+</html>

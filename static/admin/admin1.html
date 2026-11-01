@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Отправка массива объектов</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #f5f7fa;
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 700px;
+            background: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        h1 {
+            margin-top: 0;
+            font-size: 20px;
+            color: #222;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-size: 14px;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 260px;
+            padding: 14px;
+            font-family: "Fira Code", Consolas, Monaco, monospace;
+            font-size: 14px;
+            border: 1px solid #d0d7de;
+            border-radius: 8px;
+            resize: vertical;
+            outline: none;
+            transition: border-color 0.15s, box-shadow 0.15s;
+            background: #fafbfc;
+        }
+
+        textarea:focus {
+            border-color: #4a90e2;
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.15);
+            background: #fff;
+        }
+
+        textarea.invalid {
+            border-color: #e74c3c;
+            box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.15);
+        }
+
+        .actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        button {
+            padding: 10px 22px;
+            font-size: 15px;
+            font-weight: 500;
+            color: #fff;
+            background: #4a90e2;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.15s, transform 0.05s;
+        }
+
+        button:hover:not(:disabled) {
+            background: #3a7bc8;
+        }
+
+        button:active:not(:disabled) {
+            transform: translateY(1px);
+        }
+
+        button:disabled {
+            background: #a7c4e8;
+            cursor: not-allowed;
+        }
+
+        .status {
+            font-size: 14px;
+            padding: 10px 14px;
+            border-radius: 8px;
+            margin-top: 16px;
+            display: none;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .status.show {
+            display: block;
+        }
+
+        .status.ok {
+            background: #e6f4ea;
+            color: #1e7e34;
+            border: 1px solid #b7e1c1;
+        }
+
+        .status.err {
+            background: #fdecea;
+            color: #b71c1c;
+            border: 1px solid #f5b7b1;
+        }
+
+        .hint {
+            font-size: 12px;
+            color: #888;
+            margin-top: 6px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Отправка массива объектов</h1>
+
+        <label for="jsonInput">JSON-массив объектов:</label>
+        <textarea id="jsonInput" spellcheck="false">[
+  { "id": 1, "name": "Иван", "age": 30 },
+  { "id": 2, "name": "Мария", "age": 25 }
+]</textarea>
+        <div class="hint">Введите корректный JSON — массив объектов.</div>
+
+        <div class="actions">
+            <button id="sendBtn">Отправить на сервер</button>
+        </div>
+
+        <div id="status" class="status"></div>
+    </div>
+
+    <script>
+        const API_URL = "http://localhost:8081/admin";
+        const textarea = document.getElementById("jsonInput");
+        const sendBtn  = document.getElementById("sendBtn");
+        const statusEl = document.getElementById("status");
+
+        function showStatus(message, type) {
+            statusEl.textContent = message;
+            statusEl.className = "status show " + type;
+        }
+
+        function hideStatus() {
+            statusEl.className = "status";
+        }
+
+        sendBtn.addEventListener("click", async () => {
+            hideStatus();
+            textarea.classList.remove("invalid");
+
+            // 1. Проверяем, что введён корректный JSON
+            let data;
+            try {
+                data = JSON.parse(textarea.value);
+            } catch (e) {
+                textarea.classList.add("invalid");
+                showStatus("Ошибка парсинга JSON: " + e.message, "err");
+                return;
+            }
+
+            // 2. Проверяем, что это массив
+            if (!Array.isArray(data)) {
+                textarea.classList.add("invalid");
+                showStatus("Ожидается массив объектов на верхнем уровне.", "err");
+                return;
+            }
+
+            // 3. Отправляем POST-запрос
+            sendBtn.disabled = true;
+            sendBtn.textContent = "Отправка...";
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                let responseText = "";
+                try {
+                    responseText = await response.text();
+                } catch (_) { /* тело может быть пустым */ }
+
+                if (response.ok) {
+                    showStatus(
+                        `Успешно отправлено. Статус: ${response.status} ${response.statusText}` +
+                        (responseText ? `\n\nОтвет сервера:\n${responseText}` : ""),
+                        "ok"
+                    );
+                } else {
+                    showStatus(
+                        `Сервер вернул ошибку: ${response.status} ${response.statusText}` +
+                        (responseText ? `\n\n${responseText}` : ""),
+                        "err"
+                    );
+                }
+            } catch (err) {
+                showStatus(
+                    "Не удалось выполнить запрос: " + err.message +
+                    "\n\nПроверьте, что сервер запущен на http://localhost:8081 " +
+                    "и разрешает CORS-запросы с этой страницы.",
+                    "err"
+                );
+            } finally {
+                sendBtn.disabled = false;
+                sendBtn.textContent = "Отправить на сервер";
+            }
+        });
+    </script>
+</body>
+</html>
