@@ -251,14 +251,14 @@ func main() {
 
 	go func() {
 		log.Println("Админка слушает на http://localhost:8081 (скрыта от внешнего мира)")
-		if err := http.ListenAndServe(":8081", muxadmin); err != nil {
+		if err := http.ListenAndServe("127.0.0.1:8081", muxadmin); err != nil {
 			fmt.Printf("Ошибка запуска админки: %v\n", err)
 		}
 	}()
 	
 
 	server := &http.Server{
-		Addr: ":80",
+		Addr: "127.0.0.1:8443",
 		Handler: mux,
 	}
 	log.Println("Server listening")
