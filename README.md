@@ -11,7 +11,7 @@ sudo tee /etc/systemd/system/bankmath.service > /dev/null <<EOF
 Description=BankMath web service  
 After=network.target  
 
-[Service]
+[Service]  
 Type=simple  
 User=$USER  
 WorkingDirectory=$(pwd)  
